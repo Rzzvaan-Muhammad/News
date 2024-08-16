@@ -1,14 +1,14 @@
 "use client";
 import { useFetchArticles } from '../hooks/useFetchArticles';
 export default function Home() {
-const {articles} = useFetchArticles();
+const {articles} : any = useFetchArticles();
 
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8 bg-gray-100">
       <div className="w-full max-w-5xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles?.map((article, index) => (
+          {articles?.map((article:any, index:number) => (
             <div key={index} className="bg-white shadow-md rounded-lg ">
               <img
                 src={article?.urlToImage}
