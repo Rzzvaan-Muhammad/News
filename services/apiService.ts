@@ -29,14 +29,14 @@ export const fetchArticles = async () => {
   ];
 
   const responses = await Promise.all(
-    apiEndpoints.map(endpoint => axios.get(endpoint.url, { params: endpoint.params }))
+    apiEndpoints.map((endpoint:any) => axios.get(endpoint.url, { params: endpoint.params }))
   );
 
   const combinedArticles = responses?.flatMap(response => {
     if (response.data.articles) {
       return response.data.articles;
     } else if (response.data.response && response.data.response.results) {
-      return response.data.response.results.map(doc => ({
+      return response.data.response.results.map((doc:any) => ({
         title: doc.webTitle,
         description: '',
         url: doc.webUrl,
@@ -44,7 +44,7 @@ export const fetchArticles = async () => {
         urlToImage: ''
       }));
     } else if (response.data.response && response.data.response.docs) {
-      return response.data.response.docs.map(doc => ({
+      return response.data.response.docs.map((doc:any) => ({
         title: doc.headline.main,
         description: doc.snippet,
         url: doc.web_url,

@@ -7,7 +7,7 @@ export const useFetchArticles = () => {
   useEffect(() => {
     const getArticles = async () => {
       try {
-        const data = await fetchArticles();
+        const data:any = await fetchArticles();
         setArticles(data);
       } catch (error) {
         console.error('Error fetching articles:', error);
