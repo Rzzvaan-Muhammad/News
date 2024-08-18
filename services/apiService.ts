@@ -1,8 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { Option } from '../components/MultiSelectDropdown';
 import { MultiValue } from 'react-select';
-import { showToast } from '../utils/showToast';
-
 interface Article {
   title: string;
   description: string;
@@ -29,13 +27,14 @@ export const fetchArticles = async (
         from: date,
         sortBy: 'publishedAt',
         sources: getSelectedSourcesQuery(selectedSources),
-        apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
+        apiKey:  process.env.NEXT_PUBLIC_NEWS_API_KEY
       },
     },
     {
       url: process.env.NEXT_PUBLIC_NY_TIMES_BASE_URL || '',
       params: {
         q: getSelectedCategoriesQuery(selectedCategories),
+        from: date,
         sources: getSelectedSourcesQuery(selectedSources),
         'api-key': process.env.NEXT_PUBLIC_NY_TIMES_API_KEY,
       },
@@ -44,6 +43,7 @@ export const fetchArticles = async (
       url: process.env.NEXT_PUBLIC_GUARDIAN_APIS_BASE_URL || '',
       params: {
         q: getSelectedCategoriesQuery(selectedCategories),
+        from: date,
         sources: getSelectedSourcesQuery(selectedSources),
         'api-key': process.env.NEXT_PUBLIC_GUARDIAN_API_KEY,
       },
@@ -82,7 +82,6 @@ export const fetchArticles = async (
     return combinedArticles;
   } catch (error: any) {
     console.error('API request failed:', error);
-    if (error?.message) showToast(error?.message, 'error');
     throw new Error('Failed to fetch articles. Please try again later.');
   }
 };

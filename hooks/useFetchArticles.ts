@@ -1,32 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { fetchArticles } from '../services/apiService';
 import { MultiValue } from 'react-select';
 import { Option } from '../components/MultiSelectDropdown';
+import { useQuery } from '@tanstack/react-query';
+import { showToast } from '../utils/showToast';
+
 export const useFetchArticles = () => {
-  const [articles, setArticles] = useState([]);
-    const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<MultiValue<Option>>([]);
   const [sourceOptions, setSourceOptions] = useState<MultiValue<Option>>([]);
   const [date, setDate] = useState<Date>(new Date());
+
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
   };
+
   const onSearchKeyword = () => {
-    setSelectedOptions([{ value: searchInput, label: searchInput }]);
-  }
-  useEffect(() => {
+    setSelectedOptions((prev) => [{ value: searchInput, label: searchInput }, ...prev]);
+  };
 
-    const getArticles = async () => {
-      try {
-        const data: any = await fetchArticles(selectedOptions,sourceOptions, date);
-        setArticles(data);
-      } catch (error) {
-        console.error('Error fetching articles:', error);
-      }
-    };
-
-    getArticles();
-  }, [date, selectedOptions, sourceOptions]);
-
-  return {searchInput,onSearchKeyword, setSearchInput, handleSearchInputChange, articles,sourceOptions,setSourceOptions, selectedOptions, setSelectedOptions, date, setDate };
+  const { data: articles, error, isLoading } = useQuery({
+    queryKey: ['articles', selectedOptions, sourceOptions, date],
+    queryFn: () => fetchArticles(selectedOptions, sourceOptions, date), 
+    staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
+  });
+    if (error?.message) showToast(error?.message ,'error');
+  
+  return {
+    searchInput,
+    onSearchKeyword,
+    setSearchInput,
+    handleSearchInputChange,
+    articles: articles || [],
+    isLoading,
+    error,
+    sourceOptions,
+    setSourceOptions,
+    selectedOptions,
+    setSelectedOptions,
+    date,
+    setDate,
+  };
 };
