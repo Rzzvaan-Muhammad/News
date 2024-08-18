@@ -6,7 +6,7 @@ import {categoryOptions, sourceOptions} from '../constants/index'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 export default function Home() {
-  const { articles, setSelectedOptions, date, setDate, setSourceOptions }: any = useFetchArticles();
+  const {searchInput,onSearchKeyword, handleSearchInputChange,  articles, setSelectedOptions, date, setDate, setSourceOptions } = useFetchArticles();
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -14,19 +14,31 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-8 bg-gray-100">
       <div className="w-full max-w-5xl">
-        <div className="flex flex-row flex-1 w-full gap-4">
+        <div className="flex flex-col sm:flex-row flex-1 w-full gap-0 sm:gap-4">
           <MultiSelectDropdown options={categoryOptions} onChange={setSelectedOptions} />
           <MultiSelectDropdown options={sourceOptions} onChange={setSourceOptions} />
-          <div className="flex flex-row flex-1 w-full gap-4 h-[38px]">
+          <div className="flex flex-row flex-1 w-full gap-4 mb-5 sm:md-0 h-auto sm:h-[38px]">
             <input
               type="date"
-              value={date.toISOString().split('T')[0]}
-              className="px-2 py-0 border border-gray-300 rounded-lg w-full"
-              min={thirtyDaysAgo.toISOString().split('T')[0]}
+              value={date?.toISOString().split('T')[0]}
+              className="px-2 py-0 border border-gray-300 rounded-lg h-[38px] w-full"
+              min={thirtyDaysAgo?.toISOString().split('T')[0]}
               max={new Date().toISOString().split('T')[0]}
-              onChange={(e) => setDate(new Date(e.target.value))}
+              onChange={(e) => setDate(new Date(e?.target?.value))}
             />
           </div>
+        </div>
+          <div className="flex flex-row w-full gap-4 mb-4">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={handleSearchInputChange}
+            placeholder="Search news..."
+            className="px-4 py-2 border border-gray-300 rounded-lg w-full"
+          />
+          <button onClick={onSearchKeyword} disabled={!searchInput} className="px-4 py-2 bg-blue-500 text-white rounded-lg">
+            Search
+          </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles && articles.length > 0 ? (

@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import { Option } from '../components/MultiSelectDropdown';
 import { MultiValue } from 'react-select';
 import { showToast } from '../utils/showToast';
+
 interface Article {
   title: string;
   description: string;
@@ -15,34 +16,38 @@ interface ApiEndpoint {
   params: Record<string, any>;
 }
 
-export const fetchArticles = async (selectedCategories: MultiValue<Option>,selectedSources: MultiValue<Option>, date?: Date | string): Promise<Article[]> => {
+export const fetchArticles = async (
+  selectedCategories: MultiValue<Option>,
+  selectedSources: MultiValue<Option>,
+  date?: Date | string
+): Promise<Article[]> => {
   const apiEndpoints: ApiEndpoint[] = [
     {
       url: process.env.NEXT_PUBLIC_NEWS_API_ORG_BASE_URL || '',
       params: {
-        q: getSelectedCategoriesQuery(selectedCategories, 'tesla'),
+        q: getSelectedCategoriesQuery(selectedCategories),
         from: date,
         sortBy: 'publishedAt',
         sources: getSelectedSourcesQuery(selectedSources),
-        apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY
+        apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
       },
     },
     {
       url: process.env.NEXT_PUBLIC_NY_TIMES_BASE_URL || '',
       params: {
-        q: getSelectedCategoriesQuery(selectedCategories, 'election'),
+        q: getSelectedCategoriesQuery(selectedCategories),
         sources: getSelectedSourcesQuery(selectedSources),
-        'api-key': process.env.NEXT_PUBLIC_NY_TIMES_API_KEY
-      }
+        'api-key': process.env.NEXT_PUBLIC_NY_TIMES_API_KEY,
+      },
     },
     {
       url: process.env.NEXT_PUBLIC_GUARDIAN_APIS_BASE_URL || '',
       params: {
-        q: getSelectedCategoriesQuery(selectedCategories, 'debate'),
+        q: getSelectedCategoriesQuery(selectedCategories),
         sources: getSelectedSourcesQuery(selectedSources),
-        'api-key': process.env.NEXT_PUBLIC_GUARDIAN_API_KEY
-      }
-    }
+        'api-key': process.env.NEXT_PUBLIC_GUARDIAN_API_KEY,
+      },
+    },
   ];
 
   try {
@@ -59,7 +64,7 @@ export const fetchArticles = async (selectedCategories: MultiValue<Option>,selec
           description: '',
           url: doc.webUrl,
           publishedAt: doc.webPublicationDate,
-          urlToImage: 'https://picsum.photos/300'
+          urlToImage: 'https://picsum.photos/300',
         }));
       } else if (response.data.response && response.data.response.docs) {
         return response.data.response.docs.map((doc: any) => ({
@@ -67,7 +72,7 @@ export const fetchArticles = async (selectedCategories: MultiValue<Option>,selec
           description: doc.snippet,
           url: doc.web_url,
           publishedAt: doc.pub_date,
-          urlToImage: doc.multimedia.length > 0 ? `https://www.nytimes.com/${doc.multimedia[0].url}` : ''
+          urlToImage: doc.multimedia.length > 0 ? `https://www.nytimes.com/${doc.multimedia[0].url}` : '',
         }));
       } else {
         return [];
@@ -77,15 +82,15 @@ export const fetchArticles = async (selectedCategories: MultiValue<Option>,selec
     return combinedArticles;
   } catch (error: any) {
     console.error('API request failed:', error);
-    if(error?.message) showToast(error?.message,'error');
+    if (error?.message) showToast(error?.message, 'error');
     throw new Error('Failed to fetch articles. Please try again later.');
   }
 };
 
-const getSelectedCategoriesQuery = (selectedCategories: MultiValue<Option>, defaultQuery: string): string => {
-  return selectedCategories.length ? selectedCategories.map((category:Option)=> category.value).join(',').toString() : defaultQuery;
+const getSelectedCategoriesQuery = (selectedCategories: MultiValue<Option>, defaultQuery: string = 'news'): string => {
+  return selectedCategories.length ? selectedCategories.map((category: Option) => category.value).join(',').toString() : defaultQuery;
 };
 
 const getSelectedSourcesQuery = (selectedSources: MultiValue<Option>): string => {
-  return selectedSources.length ? selectedSources.map((sources:Option)=> sources.value).join(',').toString() : '';
+  return selectedSources.length ? selectedSources.map((sources: Option) => sources.value).join(',').toString() : '';
 };
