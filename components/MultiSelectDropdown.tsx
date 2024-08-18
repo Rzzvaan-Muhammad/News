@@ -35,7 +35,7 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ option
       isMulti
       options={options}
       onChange={onChange}
-      className="w-full max-w-lg mb-6"
+      className="w-full sm:max-w-lg mb-6"
       classNamePrefix="select"
       styles={{
         control,
