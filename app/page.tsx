@@ -1,16 +1,18 @@
-"use client"
+'use client';
 import 'react-toastify/dist/ReactToastify.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import News from '../components/News';
+import React from 'react';
+import { UserProvider } from '../contexts/UserContext';
+import { News } from '../components/News/index';
+
 const queryClient = new QueryClient();
+
 export default function Home() {
-
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
   return (
-       <QueryClientProvider client={queryClient}>
-       <News />
+    <UserProvider>
+      <QueryClientProvider client={queryClient}>
+        <News />
       </QueryClientProvider>
+    </UserProvider>
   );
 }
