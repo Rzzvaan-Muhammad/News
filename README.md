@@ -51,14 +51,14 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 2. Build the Docker image:
     ```bash
-    docker build -t News .
+    docker build -t news .
     ```
 
 ## Running the Application in a Docker Container
 
 1. Start the container:
     ```bash
-    docker run -p 3000:3000 News
+    docker run -p 3000:3000 news
     ```
 
 2. Open your browser and go to `http://localhost:3000` to view the application.
@@ -78,7 +78,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 - **Remove the Docker image:**
     ```bash
-    docker rmi News
+    docker rmi news
     ```
 
 ## Environment Variables
