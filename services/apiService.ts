@@ -24,7 +24,7 @@ export const fetchArticles = async (
       url: process.env.NEXT_PUBLIC_NEWS_API_ORG_BASE_URL || '',
       params: {
         q: getSelectedCategoriesQuery(selectedCategories),
-        from: date,
+        from: date?.toLocaleString(),
         sortBy: 'publishedAt',
         sources: getSelectedSourcesQuery(selectedSources),
         apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
@@ -34,7 +34,7 @@ export const fetchArticles = async (
       url: process.env.NEXT_PUBLIC_NY_TIMES_BASE_URL || '',
       params: {
         q: getSelectedCategoriesQuery(selectedCategories),
-        from: date,
+        from: date?.toLocaleString(),
         sources: getSelectedSourcesQuery(selectedSources),
         'api-key': process.env.NEXT_PUBLIC_NY_TIMES_API_KEY,
       },
@@ -43,7 +43,7 @@ export const fetchArticles = async (
       url: process.env.NEXT_PUBLIC_GUARDIAN_APIS_BASE_URL || '',
       params: {
         q: getSelectedCategoriesQuery(selectedCategories),
-        from: date,
+        from: date?.toLocaleString(),
         sources: getSelectedSourcesQuery(selectedSources),
         'api-key': process.env.NEXT_PUBLIC_GUARDIAN_API_KEY,
       },

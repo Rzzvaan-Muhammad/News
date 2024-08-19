@@ -2,7 +2,7 @@ import React from 'react';
 import { User } from '../contexts/UserContext';
 
 type UserInfoProps = {
-  user: User | null;
+  user: User;
   handleGoogleSignIn: () => void;
   handleGoogleSignOut: () => void;
 };

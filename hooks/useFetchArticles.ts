@@ -1,4 +1,4 @@
-import React, { useState, SetStateAction, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchArticles } from '../services/apiService';
 import { MultiValue } from 'react-select';
 import { Option } from '../components/MultiSelectDropdown';
@@ -10,14 +10,20 @@ import { persistState, clearState, getInitialState } from '../utils/persist-stat
 
 interface UserType {
   uid: string;
-  displayName: string | null;
-  email: string | null;
-  photoURL: string | null;
+  displayName: string;
+  email: string;
+  photoURL: string;
 }
+const initialUserState: UserType = {
+  uid: '',
+  displayName: '',
+  email: '',
+  photoURL: '',
+};
 
 export const useFetchArticles = () => {
   const [searchInput, setSearchInput] = useState('');
-  const [user, setUser] = useState<SetStateAction<UserType | null>>(null);
+  const [user, setUser] = useState<UserType>(initialUserState);
   const [selectedOptions, setSelectedOptions] = useState<MultiValue<Option>>([]);
   const [sourceOptions, setSourceOptions] = useState<MultiValue<Option>>([]);
   const [date, setDate] = useState<Date>(new Date());
@@ -48,9 +54,9 @@ export const useFetchArticles = () => {
       const loggedInUser = result.user;
       const userInfo: UserType = {
         uid: loggedInUser.uid,
-        displayName: loggedInUser.displayName,
-        email: loggedInUser.email,
-        photoURL: loggedInUser.photoURL,
+        displayName: loggedInUser.displayName || '',
+        email: loggedInUser.email || '',
+        photoURL: loggedInUser.photoURL || '',
       };
       setUser(userInfo);
       persistState('user', userInfo);
@@ -68,10 +74,10 @@ export const useFetchArticles = () => {
     } catch (error) {
       console.error('Google Sign-Out Error:', error);
     } finally {
-      setUser(null);
+      setUser(initialUserState);
     }
   };
-  const persistUserState = getInitialState('user');
+  const persistUserState: UserType | undefined = getInitialState('user');
 
   useEffect(() => {
     if (persistUserState) {
