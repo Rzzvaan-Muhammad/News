@@ -17,7 +17,7 @@ interface ApiEndpoint {
 export const fetchArticles = async (
   selectedCategories: MultiValue<Option>,
   selectedSources: MultiValue<Option>,
-  date?: Date | string
+  date?: Date | string,
 ): Promise<Article[]> => {
   const apiEndpoints: ApiEndpoint[] = [
     {
@@ -27,7 +27,7 @@ export const fetchArticles = async (
         from: date,
         sortBy: 'publishedAt',
         sources: getSelectedSourcesQuery(selectedSources),
-        apiKey:  process.env.NEXT_PUBLIC_NEWS_API_KEY
+        apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
       },
     },
     {
@@ -52,7 +52,7 @@ export const fetchArticles = async (
 
   try {
     const responses: AxiosResponse<any>[] = await Promise.all(
-      apiEndpoints.map((endpoint: ApiEndpoint) => axios.get(endpoint.url, { params: endpoint.params }))
+      apiEndpoints.map((endpoint: ApiEndpoint) => axios.get(endpoint.url, { params: endpoint.params })),
     );
 
     const combinedArticles: Article[] = responses.flatMap((response: AxiosResponse<any>) => {
@@ -87,9 +87,19 @@ export const fetchArticles = async (
 };
 
 const getSelectedCategoriesQuery = (selectedCategories: MultiValue<Option>, defaultQuery: string = 'news'): string => {
-  return selectedCategories.length ? selectedCategories.map((category: Option) => category.value).join(',').toString() : defaultQuery;
+  return selectedCategories.length
+    ? selectedCategories
+        .map((category: Option) => category.value)
+        .join(',')
+        .toString()
+    : defaultQuery;
 };
 
 const getSelectedSourcesQuery = (selectedSources: MultiValue<Option>): string => {
-  return selectedSources.length ? selectedSources.map((sources: Option) => sources.value).join(',').toString() : '';
+  return selectedSources.length
+    ? selectedSources
+        .map((sources: Option) => sources.value)
+        .join(',')
+        .toString()
+    : '';
 };
