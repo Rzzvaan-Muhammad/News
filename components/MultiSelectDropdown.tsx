@@ -1,5 +1,6 @@
 import Select, { MultiValue, ActionMeta } from 'react-select';
 import React from 'react';
+
 export interface Option {
   value: string;
   label: string;
@@ -7,10 +8,11 @@ export interface Option {
 
 interface MultiSelectDropdownProps {
   options: Option[];
+  selectedOptions: MultiValue<Option>;
   onChange: (selected: MultiValue<Option>, actionMeta: ActionMeta<Option>) => void;
 }
 
-export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ options, onChange }) => {
+export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ options, selectedOptions, onChange }) => {
   const control = (base: any) => ({
     ...base,
     borderColor: '#d1d5db',
@@ -29,10 +31,12 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ option
     backgroundColor: '#e5e7eb',
     color: '#374151',
   });
+
   return (
     <Select
       isMulti
       options={options}
+      value={selectedOptions}
       onChange={onChange}
       className="w-full sm:max-w-lg mb-6"
       classNamePrefix="select"
