@@ -2,7 +2,10 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { MultiSelectDropdown } from '../components/MultiSelectDropdown';
 import { categoryOptions, sourceOptions, Option } from '../constants/index';
 import { MultiValue } from 'react-select';
+import { User } from '../contexts/UserContext';
+
 interface SideMenuProps {
+  user: User;
   isSidebarOpen: boolean;
   date: { from: Date | null; to: Date | null };
   setDate: Dispatch<SetStateAction<{ from: Date; to: Date }>>;
@@ -17,11 +20,13 @@ interface SideMenuProps {
   resetFields: () => void;
   disableResetButton: boolean;
   toggleModal: () => void;
+  fetchPersonalizedData: () => void;
 }
 
 export const SideMenu: React.FC<SideMenuProps> = ({
   isSidebarOpen,
   date,
+  user,
   toggleModal,
   setDate,
   thirtyDaysAgo,
@@ -34,6 +39,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   onSearchKeyword,
   resetFields,
   disableResetButton,
+  fetchPersonalizedData,
 }) => {
   return (
     <aside
@@ -43,22 +49,30 @@ export const SideMenu: React.FC<SideMenuProps> = ({
     >
       <div className="flex flex-row w-full justify-between align-center pb-4">
         <span className="text-xl font-semibold">Personalization</span>
-        <button className="p-0 m-0" onClick={() => toggleModal()}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6"
+        {user.uid && (
+          <button
+            className="p-0 m-0"
+            onClick={() => {
+              toggleModal();
+              fetchPersonalizedData();
+            }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
-            />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 mb-6">

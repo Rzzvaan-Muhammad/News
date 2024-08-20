@@ -46,6 +46,7 @@ export function News() {
     disableResetButton,
     setSelectedOptions,
     handleGoogleSignIn,
+    fetchPersonalizedData,
     handleGoogleSignOut,
     handleSearchInputChange,
   } = useFetchArticles();
@@ -61,6 +62,7 @@ export function News() {
       <main className=" min-h-screen bg-gray-100">
         <SideMenu
           date={date}
+          user={user}
           setDate={setDate}
           searchInput={searchInput}
           toggleModal={toggleModal}
@@ -69,6 +71,7 @@ export function News() {
           thirtyDaysAgo={thirtyDaysAgo}
           selectedOptions={selectedOptions}
           onSearchKeyword={onSearchKeyword}
+          fetchPersonalizedData={fetchPersonalizedData}
           setSourceOptions={setSourceOptions}
           setSelectedOptions={setSelectedOptions}
           disableResetButton={disableResetButton}
