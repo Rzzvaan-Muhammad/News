@@ -15,18 +15,20 @@ export const useNYTimesAPI = (
   sourceOptions: MultiValue<Option>,
   from: Date | string,
   to: Date | string,
+  personalizedCategories: string[],
+  personalizedSources: string[],
 ) => {
   const params: Params = {
-    q: getSelectedCategoriesQuery(selectedOptions),
+    q: `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`,
     begin_date: from.toISOString().split('T')[0],
     end_date: to.toISOString().split('T')[0],
     sortBy: 'publishedAt',
     //page: 1,
-    sources: getSelectedSourcesQuery(sourceOptions),
+    sources: `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`,
   };
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['newyork', selectedOptions, sourceOptions, from, to],
+    queryKey: ['newyork', selectedOptions, sourceOptions, from, to, personalizedCategories, personalizedSources],
     queryFn: () => fetchNewYorkTimes(params),
     staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
   });

@@ -15,18 +15,20 @@ export const useGuardianAPI = (
   sourceOptions: MultiValue<Option>,
   from: Date | string,
   to: Date | string,
+  personalizedCategories: string[],
+  personalizedSources: string[],
 ) => {
   const params: Params = {
-    q: getSelectedCategoriesQuery(selectedOptions),
+    q: `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`,
     'from-date': from.toISOString().split('T')[0],
     'to-date': to.toISOString().split('T')[0],
     sortBy: 'publishedAt',
     pageSize: 3,
-    sources: getSelectedSourcesQuery(sourceOptions),
+    sources: `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`,
   };
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['guardian', selectedOptions, sourceOptions, from, to],
+    queryKey: ['guardian', selectedOptions, sourceOptions, from, to, personalizedCategories, personalizedSources],
     queryFn: () => fetchGuardiansNews(params),
     staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
   });
