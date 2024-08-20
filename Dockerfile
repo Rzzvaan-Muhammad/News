@@ -1,5 +1,5 @@
 # Use the official Node.js 18 image as the base image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -15,9 +15,6 @@ COPY . .
 
 # Build the Next.js application
 RUN yarn build
-
-# Set the environment variable to production
-ENV NODE_ENV=production
 
 # Expose port 3000 to the outside world
 EXPOSE 3000

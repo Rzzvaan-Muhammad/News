@@ -1,26 +1,35 @@
-import React, { useState, SetStateAction, useEffect } from 'react';
-import { fetchArticles } from '../services/apiService';
+import React, { useState, useEffect } from 'react';
 import { MultiValue } from 'react-select';
 import { Option } from '../components/MultiSelectDropdown';
-import { useQuery } from '@tanstack/react-query';
-import { showToast } from '../utils/showToast';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebaseConfig';
 import { persistState, clearState, getInitialState } from '../utils/persist-state';
-
+import { useOrgNewsAPI } from './useOrgNewsAPI';
+import { useNYTimesAPI } from './useNYTimesAPI';
+import { useGuardianAPI } from './useGuardianAPI';
 interface UserType {
   uid: string;
-  displayName: string | null;
-  email: string | null;
-  photoURL: string | null;
+  displayName: string;
+  email: string;
+  photoURL: string;
 }
+const initialUserState: UserType = {
+  uid: '',
+  displayName: '',
+  email: '',
+  photoURL: '',
+};
 
 export const useFetchArticles = () => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const [searchInput, setSearchInput] = useState('');
-  const [user, setUser] = useState<SetStateAction<UserType | null>>(null);
+  const [user, setUser] = useState<UserType>(initialUserState);
   const [selectedOptions, setSelectedOptions] = useState<MultiValue<Option>>([]);
   const [sourceOptions, setSourceOptions] = useState<MultiValue<Option>>([]);
-  const [date, setDate] = useState<Date>(new Date());
+  const [date, setDate] = useState<{ from: Date; to: Date }>({ from: thirtyDaysAgo, to: new Date() });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [refresh, setRefresh] = useState<boolean>(false);
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -29,18 +38,9 @@ export const useFetchArticles = () => {
   const onSearchKeyword = () => {
     setSelectedOptions((prev) => [{ value: searchInput, label: searchInput }, ...prev]);
   };
-
-  const {
-    data: articles,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ['articles', selectedOptions, sourceOptions, date],
-    queryFn: () => fetchArticles(selectedOptions, sourceOptions, date),
-    staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
-  });
-
-  if (error?.message) showToast(error?.message, 'error');
+  const { orgNewsArticles = [] } = useOrgNewsAPI(selectedOptions, sourceOptions, date.from, date.to);
+  const { nyTimesArticles = [] } = useNYTimesAPI(selectedOptions, sourceOptions, date.from, date.to);
+  const { guardianArticles = [] } = useGuardianAPI(selectedOptions, sourceOptions, date.from, date.to);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -48,9 +48,9 @@ export const useFetchArticles = () => {
       const loggedInUser = result.user;
       const userInfo: UserType = {
         uid: loggedInUser.uid,
-        displayName: loggedInUser.displayName,
-        email: loggedInUser.email,
-        photoURL: loggedInUser.photoURL,
+        displayName: loggedInUser.displayName || '',
+        email: loggedInUser.email || '',
+        photoURL: loggedInUser.photoURL || '',
       };
       setUser(userInfo);
       persistState('user', userInfo);
@@ -68,33 +68,46 @@ export const useFetchArticles = () => {
     } catch (error) {
       console.error('Google Sign-Out Error:', error);
     } finally {
-      setUser(null);
+      setUser(initialUserState);
     }
   };
-  const persistUserState = getInitialState('user');
+  const persistUserState: UserType | undefined = getInitialState('user');
 
+  const resetFields = () => {
+    setSourceOptions([]);
+    setSelectedOptions([]);
+    setRefresh(true);
+    setDate({ from: thirtyDaysAgo, to: new Date() });
+  };
   useEffect(() => {
     if (persistUserState) {
       setUser(persistUserState);
     }
   }, [persistUserState?.displayName]);
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
+  const disableResetButton = Boolean(selectedOptions?.length <= 0 || sourceOptions?.length <= 0);
   return {
     user,
+    refresh,
+    setRefresh,
+    isSidebarOpen,
+    toggleSidebar,
     searchInput,
     handleGoogleSignOut,
     handleGoogleSignIn,
     onSearchKeyword,
+    thirtyDaysAgo,
     setSearchInput,
     handleSearchInputChange,
-    articles: articles || [],
-    isLoading,
-    error,
+    articles: [...orgNewsArticles, ...nyTimesArticles, ...guardianArticles],
     sourceOptions,
     setSourceOptions,
     selectedOptions,
     setSelectedOptions,
     date,
     setDate,
+    resetFields,
+    disableResetButton,
   };
 };
