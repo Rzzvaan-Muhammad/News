@@ -25,7 +25,7 @@ export const useOrgNewsAPI = (
     to: to.toISOString().split('T')[0],
     sortBy: 'publishedAt',
     domains: personalizedCategories.length ? personalizedCategories?.toString() : '',
-    pageSize: 3,
+    //pageSize: 3,
     sources: personalizedSources.length
       ? `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`
       : getSelectedSourcesQuery(sourceOptions),

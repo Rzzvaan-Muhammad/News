@@ -31,7 +31,7 @@ export const useFetchArticles = () => {
   const [personalizedCategories, setPersonalizedCategories] = useState<string[]>([]);
   const [personalizedSources, setPersonalizedSources] = useState<string[]>([]);
   const [date, setDate] = useState<{ from: Date; to: Date }>({ from: thirtyDaysAgo, to: new Date() });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -215,6 +215,8 @@ export const useFetchArticles = () => {
     setSelectedOptions,
     personalizedCategories,
     handleSearchInputChange,
+    orgNewsArticles,
+    nyTimesArticles,
     articles: [...orgNewsArticles, ...nyTimesArticles, ...guardianArticles],
   };
 };
