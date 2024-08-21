@@ -8,6 +8,7 @@ import { getSelectedCategoriesQuery, getSelectedSourcesQuery } from '../utils/ge
 type Params = APIParams & {
   begin_date: string;
   end_date: string;
+  sort: string;
 };
 
 export const useNYTimesAPI = (
@@ -22,11 +23,12 @@ export const useNYTimesAPI = (
     q: `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`,
     begin_date: from.toISOString().split('T')[0],
     end_date: to.toISOString().split('T')[0],
-    sortBy: 'publishedAt',
+    sort: 'relevance',
     //page: 1,
-    sources: personalizedSources.length
-      ? `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`
-      : getSelectedSourcesQuery(sourceOptions),
+    sources:
+      personalizedSources.length >= 3
+        ? `${personalizedSources?.toString()} , ${getSelectedSourcesQuery(sourceOptions)}`
+        : getSelectedSourcesQuery(sourceOptions),
   };
 
   const { data, error, isLoading } = useQuery({

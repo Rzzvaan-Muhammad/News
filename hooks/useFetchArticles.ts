@@ -31,7 +31,7 @@ export const useFetchArticles = () => {
   const [personalizedCategories, setPersonalizedCategories] = useState<string[]>([]);
   const [personalizedSources, setPersonalizedSources] = useState<string[]>([]);
   const [date, setDate] = useState<{ from: Date; to: Date }>({ from: thirtyDaysAgo, to: new Date() });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -117,25 +117,32 @@ export const useFetchArticles = () => {
 
         const categoriesDoc = await getDoc(categoriesDocRef);
         const sourcesDoc = await getDoc(sourcesDocRef);
+        if (categoriesDoc.data()?.categories.length >= 3 && sourcesDoc.data()?.sources?.length >= 3) {
+          if (categoriesDoc.data()?.categories.length) {
+            const categoriesData = categoriesDoc.data();
+            setPersonalizedCategories(categoriesData?.categories || []);
+          } else {
+            setPersonalizedCategories([]);
+          }
 
-        if (categoriesDoc.data()?.categories.length) {
-          const categoriesData = categoriesDoc.data();
-          setPersonalizedCategories(categoriesData?.categories || []);
+          if (sourcesDoc.data()?.sources?.length) {
+            const sourcesData = sourcesDoc.data();
+            setPersonalizedSources(sourcesData?.sources || []);
+          } else {
+            setPersonalizedSources([]);
+          }
         } else {
-          setPersonalizedCategories([]);
-        }
-
-        if (sourcesDoc.data()?.sources?.length) {
-          const sourcesData = sourcesDoc.data();
-          setPersonalizedSources(sourcesData?.sources || []);
-        } else {
-          setPersonalizedSources([]);
+          setIsModalOpen(true);
         }
       } catch (error) {
         console.error('Error fetching personalized data:', error);
       }
     }
   };
+
+  useEffect(() => {
+    fetchPersonalizedData();
+  }, [user?.uid]);
 
   useEffect(() => {
     const updatePersonalizedData = async () => {
@@ -149,21 +156,24 @@ export const useFetchArticles = () => {
 
           const categoriesData = { categories: personalizedCategories, userId: user?.uid };
           const sourcesData = { sources: personalizedSources, userId: user?.uid };
-
-          if (personalizedCategories.length) {
-            if (categoriesDoc.data()?.categories.length && categoriesDoc.data()?.userId == user?.uid) {
-              await setDoc(categoriesDocRef, categoriesData, { merge: true });
-            } else {
-              await setDoc(categoriesDocRef, categoriesData);
+          if (personalizedCategories.length >= 3 && personalizedSources?.length >= 3) {
+            if (personalizedCategories.length) {
+              if (categoriesDoc.data()?.categories.length && categoriesDoc.data()?.userId == user?.uid) {
+                await setDoc(categoriesDocRef, categoriesData, { merge: true });
+              } else {
+                await setDoc(categoriesDocRef, categoriesData);
+              }
             }
-          }
 
-          if (personalizedSources.length) {
-            if (sourcesDoc.data()?.sources?.length && sourcesDoc.data()?.userId == user?.uid) {
-              await setDoc(sourcesDocRef, sourcesData, { merge: true });
-            } else {
-              await setDoc(sourcesDocRef, sourcesData);
+            if (personalizedSources.length) {
+              if (sourcesDoc.data()?.sources?.length && sourcesDoc.data()?.userId == user?.uid) {
+                await setDoc(sourcesDocRef, sourcesData, { merge: true });
+              } else {
+                await setDoc(sourcesDocRef, sourcesData);
+              }
             }
+          } else {
+            setIsModalOpen(true);
           }
 
           console.log('Personalized data successfully updated in Firestore');
@@ -186,6 +196,7 @@ export const useFetchArticles = () => {
       setUser(persistUserState);
     }
   }, [persistUserState?.displayName]);
+
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
   const toggleModal = () => setIsModalOpen(!isModalOpen);
   const disableResetButton = Boolean(selectedOptions?.length <= 0 || sourceOptions?.length <= 0);

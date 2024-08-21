@@ -33,7 +33,7 @@ export const Header: React.FC<UserInfoProps> = ({ user, handleGoogleSignIn, hand
     >
       <div className="text-lg font-bold flex justify-between md:justify-center items-center w-full md:w-auto">
         {/* Toggle Button */}
-        <button onClick={toggleSidebar} className="bg-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button onClick={toggleSidebar} className="bg-white p-2 focus:outline-none">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
