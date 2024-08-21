@@ -73,7 +73,6 @@ export function News() {
           isSidebarOpen={isSidebarOpen}
           thirtyDaysAgo={thirtyDaysAgo}
           selectedOptions={selectedOptions}
-          fetchPersonalizedData={fetchPersonalizedData}
           setSourceOptions={setSourceOptions}
           setSelectedOptions={setSelectedOptions}
           disableResetButton={disableResetButton}

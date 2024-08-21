@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User } from '../contexts/UserContext';
+import { User } from '../constants/index';
 
 type UserInfoProps = {
   user: User;

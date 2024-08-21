@@ -8,12 +8,14 @@ import { useOrgNewsAPI } from './useOrgNewsAPI';
 import { useNYTimesAPI } from './useNYTimesAPI';
 import { useGuardianAPI } from './useGuardianAPI';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+
 interface UserType {
   uid: string;
   displayName: string;
   email: string;
   photoURL: string;
 }
+
 const initialUserState: UserType = {
   uid: '',
   displayName: '',
@@ -24,6 +26,7 @@ const initialUserState: UserType = {
 export const useFetchArticles = () => {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
   const [searchInput, setSearchInput] = useState('');
   const [user, setUser] = useState<UserType>(initialUserState);
   const [selectedOptions, setSelectedOptions] = useState<MultiValue<Option>>([]);
@@ -33,49 +36,29 @@ export const useFetchArticles = () => {
   const [date, setDate] = useState<{ from: Date; to: Date }>({ from: thirtyDaysAgo, to: new Date() });
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-  };
 
-  const onSearchKeyword = () => {
-    setSelectedOptions((prev) => [{ value: searchInput, label: searchInput }, ...prev]);
-  };
+  useEffect(() => {
+    const persistedUser: UserType | undefined = getInitialState('user');
+    if (persistedUser) setUser(persistedUser);
+  }, []);
 
-  const { orgNewsArticles = [] } = useOrgNewsAPI(
-    selectedOptions,
-    sourceOptions,
-    date.from,
-    date.to,
-    personalizedCategories,
-    personalizedSources,
-  );
-  const { nyTimesArticles = [] } = useNYTimesAPI(
-    selectedOptions,
-    sourceOptions,
-    date.from,
-    date.to,
-    personalizedCategories,
-    personalizedSources,
-  );
-  const { guardianArticles = [] } = useGuardianAPI(
-    selectedOptions,
-    sourceOptions,
-    date.from,
-    date.to,
-    personalizedCategories,
-    personalizedSources,
-  );
+  useEffect(() => {
+    if (user?.uid) fetchPersonalizedData(user.uid);
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (user?.uid) updatePersonalizedData(user.uid);
+  }, [personalizedSources, personalizedCategories, user?.uid]);
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value);
+
+  const onSearchKeyword = () => setSelectedOptions((prev) => [{ value: searchInput, label: searchInput }, ...prev]);
 
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const loggedInUser = result.user;
-      const userInfo: UserType = {
-        uid: loggedInUser.uid,
-        displayName: loggedInUser.displayName || '',
-        email: loggedInUser.email || '',
-        photoURL: loggedInUser.photoURL || '',
-      };
+      const userInfo = extractUserInfo(loggedInUser);
       setUser(userInfo);
       persistState('user', userInfo);
     } catch (error) {
@@ -87,119 +70,69 @@ export const useFetchArticles = () => {
     try {
       await signOut(auth);
       clearState('user');
-      setPersonalizedCategories([]);
-      setPersonalizedSources([]);
-      console.log('User signed out successfully.');
+      resetPersonalization();
     } catch (error) {
       console.error('Google Sign-Out Error:', error);
-    } finally {
-      setUser(initialUserState);
-    }
-  };
-  const persistUserState: UserType | undefined = getInitialState('user');
-  const toggleCategory = (category: string) => {
-    setPersonalizedCategories((prevSelected) =>
-      prevSelected.includes(category) ? prevSelected.filter((item) => item !== category) : [...prevSelected, category],
-    );
-  };
-
-  const toggleSource = (source: string) => {
-    setPersonalizedSources((prevSelected) =>
-      prevSelected.includes(source) ? prevSelected.filter((item) => item !== source) : [...prevSelected, source],
-    );
-  };
-
-  const fetchPersonalizedData = async () => {
-    if (user?.uid) {
-      try {
-        const categoriesDocRef = doc(db, 'personalizedCategories', user.uid);
-        const sourcesDocRef = doc(db, 'personalizedSources', user.uid);
-
-        const categoriesDoc = await getDoc(categoriesDocRef);
-        const sourcesDoc = await getDoc(sourcesDocRef);
-        if (categoriesDoc.data()?.categories.length >= 3 && sourcesDoc.data()?.sources?.length >= 3) {
-          if (categoriesDoc.data()?.categories.length) {
-            const categoriesData = categoriesDoc.data();
-            setPersonalizedCategories(categoriesData?.categories || []);
-          } else {
-            setPersonalizedCategories([]);
-          }
-
-          if (sourcesDoc.data()?.sources?.length) {
-            const sourcesData = sourcesDoc.data();
-            setPersonalizedSources(sourcesData?.sources || []);
-          } else {
-            setPersonalizedSources([]);
-          }
-        } else {
-          setIsModalOpen(true);
-        }
-      } catch (error) {
-        console.error('Error fetching personalized data:', error);
-      }
     }
   };
 
-  useEffect(() => {
-    fetchPersonalizedData();
-  }, [user?.uid]);
+  const fetchPersonalizedData = async (uid: string) => {
+    try {
+      const categoriesDoc = await getDoc(doc(db, 'personalizedCategories', uid));
+      const sourcesDoc = await getDoc(doc(db, 'personalizedSources', uid));
 
-  useEffect(() => {
-    const updatePersonalizedData = async () => {
-      if (user?.uid) {
-        const categoriesDocRef = doc(db, 'personalizedCategories', user.uid);
-        const sourcesDocRef = doc(db, 'personalizedSources', user.uid);
+      if (categoriesDoc.exists()) setPersonalizedCategories(categoriesDoc.data()?.categories || []);
+      if (sourcesDoc.exists()) setPersonalizedSources(sourcesDoc.data()?.sources || []);
+    } catch (error) {
+      console.error('Error fetching personalized data:', error);
+    }
+  };
 
-        try {
-          const categoriesDoc = await getDoc(categoriesDocRef);
-          const sourcesDoc = await getDoc(sourcesDocRef);
+  const updatePersonalizedData = async (uid: string) => {
+    if (personalizedCategories.length < 3 || personalizedSources.length < 3) {
+      setIsModalOpen(true);
+      return;
+    }
 
-          const categoriesData = { categories: personalizedCategories, userId: user?.uid };
-          const sourcesData = { sources: personalizedSources, userId: user?.uid };
-          if (personalizedCategories.length >= 3 && personalizedSources?.length >= 3) {
-            if (personalizedCategories.length) {
-              if (categoriesDoc.data()?.categories.length && categoriesDoc.data()?.userId == user?.uid) {
-                await setDoc(categoriesDocRef, categoriesData, { merge: true });
-              } else {
-                await setDoc(categoriesDocRef, categoriesData);
-              }
-            }
+    try {
+      await setDoc(
+        doc(db, 'personalizedCategories', uid),
+        { categories: personalizedCategories, userId: uid },
+        { merge: true },
+      );
+      await setDoc(doc(db, 'personalizedSources', uid), { sources: personalizedSources, userId: uid }, { merge: true });
+    } catch (error) {
+      console.error('Error updating Firestore:', error);
+    }
+  };
 
-            if (personalizedSources.length) {
-              if (sourcesDoc.data()?.sources?.length && sourcesDoc.data()?.userId == user?.uid) {
-                await setDoc(sourcesDocRef, sourcesData, { merge: true });
-              } else {
-                await setDoc(sourcesDocRef, sourcesData);
-              }
-            }
-          } else {
-            setIsModalOpen(true);
-          }
+  const resetPersonalization = () => {
+    setPersonalizedCategories([]);
+    setPersonalizedSources([]);
+    setUser(initialUserState);
+  };
 
-          console.log('Personalized data successfully updated in Firestore');
-        } catch (error) {
-          console.error('Error updating Firestore:', error);
-        }
-      }
-    };
+  const orgNewsArticles =
+    useOrgNewsAPI(selectedOptions, sourceOptions, date.from, date.to, personalizedCategories, personalizedSources)
+      ?.orgNewsArticles || [];
+  const nyTimesArticles =
+    useNYTimesAPI(selectedOptions, sourceOptions, date.from, date.to, personalizedCategories, personalizedSources)
+      ?.nyTimesArticles || [];
+  const guardianArticles =
+    useGuardianAPI(selectedOptions, sourceOptions, date.from, date.to, personalizedCategories, personalizedSources)
+      ?.guardianArticles || [];
 
-    updatePersonalizedData();
-  }, [personalizedSources, personalizedCategories, user?.uid]); // Dependency array to refetch when `personalizedSources`, `personalizedCategories`, or `user?.uid` changes
-
+  const toggleCategory = (category: string) => setPersonalizedCategories(toggleItem(personalizedCategories, category));
+  const toggleSource = (source: string) => setPersonalizedSources(toggleItem(personalizedSources, source));
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  const toggleModal = () => setIsModalOpen((prev) => !prev);
+  const disableResetButton = selectedOptions.length === 0 && sourceOptions.length === 0;
   const resetFields = () => {
     setSourceOptions([]);
     setSelectedOptions([]);
     setDate({ from: thirtyDaysAgo, to: new Date() });
   };
-  useEffect(() => {
-    if (persistUserState) {
-      setUser(persistUserState);
-    }
-  }, [persistUserState?.displayName]);
 
-  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
-  const toggleModal = () => setIsModalOpen(!isModalOpen);
-  const disableResetButton = Boolean(selectedOptions?.length <= 0 || sourceOptions?.length <= 0);
   return {
     user,
     date,
@@ -231,3 +164,13 @@ export const useFetchArticles = () => {
     articles: [...orgNewsArticles, ...nyTimesArticles, ...guardianArticles],
   };
 };
+
+const toggleItem = (items: string[], item: string) =>
+  items.includes(item) ? items.filter((i) => i !== item) : [...items, item];
+
+const extractUserInfo = (user: any): UserType => ({
+  uid: user.uid,
+  displayName: user.displayName || '',
+  email: user.email || '',
+  photoURL: user.photoURL || '',
+});

@@ -19,33 +19,35 @@ export const useNYTimesAPI = (
   personalizedCategories: string[],
   personalizedSources: string[],
 ) => {
-  const params: Params = {
-    q: `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`,
-    begin_date: from.toISOString().split('T')[0],
-    end_date: to.toISOString().split('T')[0],
+  const buildQueryParams = (): Params => ({
+    q: [getSelectedCategoriesQuery(selectedOptions), personalizedCategories.join(', ')].filter(Boolean).join(', '),
+    begin_date: new Date(from).toISOString().split('T')[0],
+    end_date: new Date(to).toISOString().split('T')[0],
     sort: 'relevance',
-    //page: 1,
-    sources:
-      personalizedSources.length >= 3
-        ? `${personalizedSources?.toString()} , ${getSelectedSourcesQuery(sourceOptions)}`
-        : getSelectedSourcesQuery(sourceOptions),
-  };
+    sources: [
+      personalizedSources.length >= 3 ? personalizedSources.join(', ') : '',
+      getSelectedSourcesQuery(sourceOptions),
+    ]
+      .filter(Boolean)
+      .join(', '),
+  });
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['newyork', selectedOptions, sourceOptions, from, to, personalizedCategories, personalizedSources],
-    queryFn: () => fetchNewYorkTimes(params),
+    queryFn: () => fetchNewYorkTimes(buildQueryParams()),
     staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
   });
-  if (error?.message) showToast(error?.message, 'error');
-  return {
-    nyTimesArticles: data?.data?.response?.docs?.map((doc: any) => ({
+
+  if (error?.message) showToast(error.message, 'error');
+
+  const nyTimesArticles =
+    data?.data?.response?.docs?.map((doc: any) => ({
       title: doc.headline.main,
       description: doc.snippet,
       url: doc.web_url,
       publishedAt: doc.pub_date,
       urlToImage: doc.multimedia.length > 0 ? `https://www.nytimes.com/${doc.multimedia[0].url}` : '',
-    })),
-    isLoading,
-    error,
-  };
+    })) || [];
+
+  return { nyTimesArticles, isLoading, error };
 };
