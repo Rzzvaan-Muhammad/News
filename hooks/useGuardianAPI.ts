@@ -19,37 +19,36 @@ export const useGuardianAPI = (
   personalizedCategories: string[],
   personalizedSources: string[],
 ) => {
-  const params: Params = {
-    q: personalizedCategories.length
-      ? `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`
-      : `${getSelectedCategoriesQuery(selectedOptions)}`,
-    'from-date': from.toISOString().split('T')[0],
-    'to-date': to.toISOString().split('T')[0],
+  const buildQueryParams = (): Params => ({
+    q: [getSelectedCategoriesQuery(selectedOptions), personalizedCategories.join(', ')].filter(Boolean).join(', '),
+    'from-date': new Date(from).toISOString().split('T')[0],
+    'to-date': new Date(to).toISOString().split('T')[0],
     'order-by': 'relevance',
     pageSize: 3,
-    sources:
-      personalizedSources.length >= 3
-        ? `${personalizedSources?.toString()} , ${getSelectedSourcesQuery(sourceOptions)}`
-        : getSelectedSourcesQuery(sourceOptions),
-  };
+    sources: [
+      personalizedSources.length >= 3 ? personalizedSources.join(', ') : '',
+      getSelectedSourcesQuery(sourceOptions),
+    ]
+      .filter(Boolean)
+      .join(', '),
+  });
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['guardian', selectedOptions, sourceOptions, from, to, personalizedCategories, personalizedSources],
-    queryFn: () => fetchGuardiansNews(params),
+    queryFn: () => fetchGuardiansNews(buildQueryParams()),
     staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
   });
 
-  if (error?.message) showToast(error?.message, 'error');
+  if (error?.message) showToast(error.message, 'error');
 
-  return {
-    guardianArticles: data?.data?.response?.results?.map((doc: any) => ({
+  const guardianArticles =
+    data?.data?.response?.results?.map((doc: any) => ({
       title: doc.webTitle,
       description: '',
       url: doc.webUrl,
       publishedAt: doc.webPublicationDate,
       urlToImage: '',
-    })),
-    isLoading,
-    error,
-  };
+    })) || [];
+
+  return { guardianArticles, isLoading, error };
 };

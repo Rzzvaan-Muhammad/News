@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { MultiSelectDropdown } from '../components/MultiSelectDropdown';
 import { categoryOptions, sourceOptions, Option } from '../constants/index';
 import { MultiValue } from 'react-select';
-import { User } from '../contexts/UserContext';
+import { User } from '../constants/index';
 
 interface SideMenuProps {
   user: User;
@@ -17,7 +17,6 @@ interface SideMenuProps {
   resetFields: () => void;
   disableResetButton: boolean;
   toggleModal: () => void;
-  fetchPersonalizedData: () => void;
 }
 
 export const SideMenu: React.FC<SideMenuProps> = ({

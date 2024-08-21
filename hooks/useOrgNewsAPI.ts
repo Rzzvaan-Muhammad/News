@@ -20,30 +20,31 @@ export const useOrgNewsAPI = (
   personalizedCategories: string[],
   personalizedSources: string[],
 ) => {
-  const params: Params = {
+  const buildQueryParams = (): Params => ({
     q: getSelectedCategoriesQuery(selectedOptions),
-    from: from.toISOString().split('T')[0],
-    to: to.toISOString().split('T')[0],
+    from: new Date(from).toISOString().split('T')[0],
+    to: new Date(to).toISOString().split('T')[0],
     sortBy: 'popularity',
-    domains: personalizedCategories.length ? personalizedCategories?.toString() : '',
-    //pageSize: 3,
+    domains: personalizedCategories.join(', '),
     language: 'en',
-    sources:
-      personalizedSources.length >= 3
-        ? `${personalizedSources?.toString()} , ${getSelectedSourcesQuery(sourceOptions)}`
-        : getSelectedSourcesQuery(sourceOptions),
-  };
+    sources: [
+      personalizedSources.length >= 3 ? personalizedSources.join(', ') : '',
+      getSelectedSourcesQuery(sourceOptions),
+    ]
+      .filter(Boolean)
+      .join(', '),
+  });
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['news', selectedOptions, sourceOptions, from, to, personalizedCategories, personalizedSources],
-    queryFn: () => fetchOrgNews(params),
+    queryFn: () => fetchOrgNews(buildQueryParams()),
     staleTime: 5 * 60 * 1000, // Cache data for 5 minutes
   });
 
-  if (error?.message) showToast(error?.message, 'error');
+  if (error?.message) showToast(error.message, 'error');
 
   return {
-    orgNewsArticles: data?.data?.articles,
+    orgNewsArticles: data?.data?.articles || [],
     isLoading,
     error,
   };

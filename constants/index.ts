@@ -2,6 +2,12 @@ export type Option = {
   value: string;
   label: string;
 };
+export interface User {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL: string;
+}
 
 export const categoryOptions: Option[] = [
   { value: 'tesla', label: 'Tesla' },
