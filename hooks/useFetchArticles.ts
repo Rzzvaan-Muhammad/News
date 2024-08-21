@@ -36,6 +36,7 @@ export const useFetchArticles = () => {
   const [date, setDate] = useState<{ from: Date; to: Date }>({ from: thirtyDaysAgo, to: new Date() });
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const persistedUser: UserType | undefined = getInitialState('user');
@@ -77,6 +78,7 @@ export const useFetchArticles = () => {
   };
 
   const fetchPersonalizedData = async (uid: string) => {
+    setIsLoading(true);
     try {
       const categoriesDoc = await getDoc(doc(db, 'personalizedCategories', uid));
       const sourcesDoc = await getDoc(doc(db, 'personalizedSources', uid));
@@ -85,6 +87,8 @@ export const useFetchArticles = () => {
       if (sourcesDoc.exists()) setPersonalizedSources(sourcesDoc.data()?.sources || []);
     } catch (error) {
       console.error('Error fetching personalized data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -137,6 +141,7 @@ export const useFetchArticles = () => {
     user,
     date,
     setDate,
+    isLoading,
     resetFields,
     isSidebarOpen,
     toggleSidebar,

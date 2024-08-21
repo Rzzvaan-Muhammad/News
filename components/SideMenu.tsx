@@ -76,7 +76,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
           className="px-4 py-2 border border-gray-300 rounded-lg w-full"
           min={thirtyDaysAgo?.toISOString().split('T')[0]}
           max={new Date().toISOString().split('T')[0]}
-          onChange={(e) => setDate({ ...date, from: new Date(e.target.value) })}
+          onChange={(e) => setDate({ from: new Date(e.target.value), to: date?.to || new Date() })}
         />
         <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 mt-4 mb-2">
           To
@@ -88,7 +88,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
           className="px-4 py-2 border border-gray-300 rounded-lg w-full"
           min={thirtyDaysAgo?.toISOString().split('T')[0]}
           max={new Date().toISOString().split('T')[0]}
-          onChange={(e) => setDate({ ...date, to: new Date(e.target.value) })}
+          onChange={(e) => setDate({ ...date, to: new Date(e.target.value), from: date?.from || thirtyDaysAgo })}
         />
       </div>
 

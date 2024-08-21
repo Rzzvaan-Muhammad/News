@@ -3,6 +3,7 @@ import { Modal } from '../Modal';
 import { sourceOptions, categoryOptions } from '../../constants/index';
 
 interface ModalProps {
+  isLoading: boolean;
   isModalOpen: boolean;
   toggleModal: () => void;
   toggleSource: (source: string) => void;
@@ -44,6 +45,7 @@ const CheckIcon: React.FC = () => (
 );
 
 export const PersonalizedFeedModal: React.FC<ModalProps> = ({
+  isLoading,
   isModalOpen,
   toggleModal,
   toggleCategory,
@@ -68,26 +70,37 @@ export const PersonalizedFeedModal: React.FC<ModalProps> = ({
 
   return (
     <Modal isOpen={isModalOpen} onClose={toggleModal}>
-      <h2 className="text-xl font-semibold mb-4">Personalization</h2>
-      {(personalizedCategories.length < 3 || personalizedSources.length < 3) && (
-        <h3 className="text-xl text-red-500 text-center font-semibold mb-4">
-          Please select at least 3 categories and sources
-        </h3>
-      )}
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="text-lg mb-1 font-medium">Categories</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {renderOptionButtons(categoryOptions, personalizedCategories, toggleCategory)}
+      <div className="w-full min-h-[400px]">
+        {isLoading && (
+          <div className="text-center">
+            <span>Loading...</span>
           </div>
-        </div>
+        )}
+        {!isLoading && (
+          <>
+            <h2 className="text-xl font-semibold mb-4">Personalization</h2>
+            {(personalizedCategories.length < 3 || personalizedSources.length < 3) && (
+              <h3 className="text-xl text-red-500 text-center font-semibold mb-4">
+                Please select at least 3 categories and sources
+              </h3>
+            )}
+            <div className="flex flex-col gap-4">
+              <div>
+                <h3 className="text-lg mb-1 font-medium">Categories</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {renderOptionButtons(categoryOptions, personalizedCategories, toggleCategory)}
+                </div>
+              </div>
 
-        <div>
-          <h3 className="text-lg mb-1 font-medium">Sources</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {renderOptionButtons(sourceOptions, personalizedSources, toggleSource)}
-          </div>
-        </div>
+              <div>
+                <h3 className="text-lg mb-1 font-medium">Sources</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {renderOptionButtons(sourceOptions, personalizedSources, toggleSource)}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </Modal>
   );

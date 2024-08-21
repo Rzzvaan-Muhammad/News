@@ -7,12 +7,13 @@ export interface Option {
 }
 
 interface MultiSelectDropdownProps {
+  id: string;
   options: Option[];
   selectedOptions: MultiValue<Option>;
   onChange: (selected: MultiValue<Option>, actionMeta: ActionMeta<Option>) => void;
 }
 
-export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ options, selectedOptions, onChange }) => {
+export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ id, options, selectedOptions, onChange }) => {
   const control = (base: any) => ({
     ...base,
     borderColor: '#d1d5db',
@@ -35,6 +36,7 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ option
   return (
     <Select
       isMulti
+      id={id}
       options={options}
       value={selectedOptions}
       onChange={onChange}
