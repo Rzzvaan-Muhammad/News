@@ -22,7 +22,7 @@ const OptionButton: React.FC<OptionButtonProps> = ({ label, value, isSelected, o
   <button
     key={value}
     onClick={onClick}
-    className={`px-4 py-2 rounded-lg text-white ${isSelected ? 'bg-green-500' : 'bg-gray-500'} ${
+    className={`px-4 py-2 rounded-lg text-[12px] text-white ${isSelected ? 'bg-green-400' : 'bg-gray-400'} ${
       !isSelected ? 'opacity-50' : ''
     } flex items-center justify-between`}
   >
@@ -33,7 +33,7 @@ const OptionButton: React.FC<OptionButtonProps> = ({ label, value, isSelected, o
 
 const CheckIcon: React.FC = () => (
   <svg
-    className="w-5 h-5 ml-2"
+    className="w-4 h-4 ml-2"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
