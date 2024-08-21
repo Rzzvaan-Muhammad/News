@@ -14,9 +14,6 @@ interface SideMenuProps {
   setSelectedOptions: Dispatch<SetStateAction<MultiValue<Option>>>;
   sourceSelectedOptions: MultiValue<Option>;
   setSourceOptions: Dispatch<SetStateAction<MultiValue<Option>>>;
-  searchInput: string;
-  handleSearchInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSearchKeyword: () => void;
   resetFields: () => void;
   disableResetButton: boolean;
   toggleModal: () => void;
@@ -26,20 +23,14 @@ interface SideMenuProps {
 export const SideMenu: React.FC<SideMenuProps> = ({
   isSidebarOpen,
   date,
-  user,
-  toggleModal,
   setDate,
   thirtyDaysAgo,
   selectedOptions,
   setSelectedOptions,
   sourceSelectedOptions,
   setSourceOptions,
-  searchInput,
-  handleSearchInputChange,
-  onSearchKeyword,
   resetFields,
   disableResetButton,
-  fetchPersonalizedData,
 }) => {
   return (
     <aside
@@ -49,54 +40,6 @@ export const SideMenu: React.FC<SideMenuProps> = ({
     >
       <div className="flex flex-row w-full justify-between align-center pb-4">
         <span className="text-xl font-semibold">Personalization</span>
-        {user.uid && (
-          <button
-            className="p-0 m-0"
-            onClick={() => {
-              toggleModal();
-              fetchPersonalizedData();
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
-              />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-4 mb-6">
-        <label htmlFor="searchInput" className="block text-sm font-medium text-gray-700">
-          Search by keywords
-        </label>
-        <input
-          id="searchInput"
-          type="text"
-          value={searchInput}
-          onChange={handleSearchInputChange}
-          placeholder="Search news..."
-          className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-        />
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <button
-          onClick={onSearchKeyword}
-          disabled={!searchInput}
-          className="px-4 py-2 w-full bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 disabled:opacity-50"
-        >
-          Search
-        </button>
       </div>
 
       <div className="mb-6">

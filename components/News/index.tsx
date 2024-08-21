@@ -68,22 +68,26 @@ export function News() {
           date={date}
           user={user}
           setDate={setDate}
-          searchInput={searchInput}
           toggleModal={toggleModal}
           resetFields={resetFields}
           isSidebarOpen={isSidebarOpen}
           thirtyDaysAgo={thirtyDaysAgo}
           selectedOptions={selectedOptions}
-          onSearchKeyword={onSearchKeyword}
           fetchPersonalizedData={fetchPersonalizedData}
           setSourceOptions={setSourceOptions}
           setSelectedOptions={setSelectedOptions}
           disableResetButton={disableResetButton}
           sourceSelectedOptions={sourceSelectedOptions}
-          handleSearchInputChange={handleSearchInputChange}
         />
         <div className={`pt-[110px] p-8 transition-all duration-300 z-0 overflow-scroll`}>
-          <Hero />
+          <Hero
+            user={user}
+            searchInput={searchInput}
+            toggleModal={toggleModal}
+            onSearchKeyword={onSearchKeyword}
+            fetchPersonalizedData={fetchPersonalizedData}
+            handleSearchInputChange={handleSearchInputChange}
+          />
           <div className={`flex ${sm ? 'flex-col' : 'flex-row'} justify-between lg:gap-4 align-top w-full`}>
             <div className="flex flex-col rounded-3xl bg-[#fff] p-[16px] lg:max-w-3xl lg:mx-auto  min-w-[60%] mr-auto mb-8">
               <div className="mb-[16px] p-[16px] border-b">
