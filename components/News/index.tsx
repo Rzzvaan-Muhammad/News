@@ -30,6 +30,7 @@ export function News() {
     date,
     setDate,
     articles,
+    isLoading,
     orgNewsArticles,
     thirtyDaysAgo,
     resetFields,
@@ -147,6 +148,7 @@ export function News() {
         <ToastContainer />
       </main>
       <PersonalizedFeedModal
+        isLoading={isLoading}
         isModalOpen={isModalOpen}
         toggleModal={toggleModal}
         toggleCategory={toggleCategory}
