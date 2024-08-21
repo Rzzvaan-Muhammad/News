@@ -9,6 +9,7 @@ type Params = APIParams & {
   from: string;
   to: string;
   domains: string;
+  language: string;
 };
 
 export const useOrgNewsAPI = (
@@ -23,12 +24,14 @@ export const useOrgNewsAPI = (
     q: getSelectedCategoriesQuery(selectedOptions),
     from: from.toISOString().split('T')[0],
     to: to.toISOString().split('T')[0],
-    sortBy: 'publishedAt',
+    sortBy: 'popularity',
     domains: personalizedCategories.length ? personalizedCategories?.toString() : '',
     //pageSize: 3,
-    sources: personalizedSources.length
-      ? `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`
-      : getSelectedSourcesQuery(sourceOptions),
+    language: 'en',
+    sources:
+      personalizedSources.length >= 3
+        ? `${personalizedSources?.toString()} , ${getSelectedSourcesQuery(sourceOptions)}`
+        : getSelectedSourcesQuery(sourceOptions),
   };
 
   const { data, error, isLoading } = useQuery({

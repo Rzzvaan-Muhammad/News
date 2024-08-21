@@ -3,7 +3,7 @@ import axios from 'axios';
 export interface APIParams {
   q: string;
   from?: string;
-  sortBy: string;
+  sortBy?: string;
   sources: string;
   apiKey?: string;
   pageSize?: number;

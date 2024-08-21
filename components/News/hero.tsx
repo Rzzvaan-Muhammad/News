@@ -31,7 +31,7 @@ export const Hero: React.FC<SideMenuProps> = ({
         <button
           onClick={onSearchKeyword}
           disabled={!searchInput}
-          className="px-4 py-2 w-[5%] md:border border-l-gray-200 border-gray-400 rounded-r-lg text-gray-500 cursor-pointer bg-white hover:text-blue-600 hover:bg-gray-200 disabled:opacity-50"
+          className="px-4 py-2 w-[60px] md:border border-l-gray-200 border-gray-400 rounded-r-lg text-gray-500 cursor-pointer bg-white hover:text-blue-600 hover:bg-gray-200 disabled:opacity-50"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -49,19 +49,19 @@ export const Hero: React.FC<SideMenuProps> = ({
           </svg>
         </button>
       </div>
-      <div className="w-full flex flex-col lg:flex-row justify-between align-center mb-8">
-        <div className="flex flex-col">
-          <span className="text-[32px] font-sans">Your briefing</span>
-          <span className="text-[16px] text-gray-500 font-sans">
-            {new Date().toLocaleDateString('en-GB', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-            })}
-          </span>
-        </div>
-        <div className="mt-4">
-          {user?.uid && (
+      {user?.uid && (
+        <div className="w-full flex flex-col lg:flex-row justify-between align-center mb-8">
+          <div className="flex flex-col">
+            <span className="text-[32px] font-sans">Your briefing</span>
+            <span className="text-[16px] text-gray-500 font-sans">
+              {new Date().toLocaleDateString('en-GB', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+              })}
+            </span>
+          </div>
+          <div className="mt-4">
             <button
               className="py-2 px-4 m-0 w-full md:w-auto border border-gray-400 rounded-3xl flex flex-row justify-between gap-2 text-[#0b57d0]"
               onClick={() => {
@@ -85,9 +85,9 @@ export const Hero: React.FC<SideMenuProps> = ({
                 />
               </svg>
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

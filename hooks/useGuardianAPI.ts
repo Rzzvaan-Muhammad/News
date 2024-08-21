@@ -8,6 +8,7 @@ import { getSelectedCategoriesQuery, getSelectedSourcesQuery } from '../utils/ge
 type Params = APIParams & {
   'from-date': string;
   'to-date': string;
+  'order-by': string;
 };
 
 export const useGuardianAPI = (
@@ -19,14 +20,17 @@ export const useGuardianAPI = (
   personalizedSources: string[],
 ) => {
   const params: Params = {
-    q: `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`,
+    q: personalizedCategories.length
+      ? `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`
+      : `${getSelectedCategoriesQuery(selectedOptions)}`,
     'from-date': from.toISOString().split('T')[0],
     'to-date': to.toISOString().split('T')[0],
-    sortBy: 'publishedAt',
+    'order-by': 'relevance',
     pageSize: 3,
-    sources: personalizedSources.length
-      ? `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`
-      : getSelectedSourcesQuery(sourceOptions),
+    sources:
+      personalizedSources.length >= 3
+        ? `${personalizedSources?.toString()} , ${getSelectedSourcesQuery(sourceOptions)}`
+        : getSelectedSourcesQuery(sourceOptions),
   };
 
   const { data, error, isLoading } = useQuery({
