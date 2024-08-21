@@ -28,15 +28,12 @@ export const Header: React.FC<UserInfoProps> = ({ user, handleGoogleSignIn, hand
 
   return (
     <header
-      className="flex flex-col md:flex-row justify-between p-4 bg-gray-800 text-white fixed w-full"
+      className="flex flex-col md:flex-row justify-between p-4 border-b bg-white fixed w-full"
       style={{ zIndex: 1000 }}
     >
       <div className="text-lg font-bold flex justify-between md:justify-center items-center w-full md:w-auto">
         {/* Toggle Button */}
-        <button
-          onClick={toggleSidebar}
-          className="bg-gray-800 text-white p-2 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
+        <button onClick={toggleSidebar} className="bg-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

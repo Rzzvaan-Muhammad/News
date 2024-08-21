@@ -24,7 +24,9 @@ export const useGuardianAPI = (
     'to-date': to.toISOString().split('T')[0],
     sortBy: 'publishedAt',
     pageSize: 3,
-    sources: `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`,
+    sources: personalizedSources.length
+      ? `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`
+      : getSelectedSourcesQuery(sourceOptions),
   };
 
   const { data, error, isLoading } = useQuery({

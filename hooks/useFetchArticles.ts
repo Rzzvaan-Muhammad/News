@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { MultiValue } from 'react-select';
 import { Option } from '../components/MultiSelectDropdown';
 import { signInWithPopup, signOut } from 'firebase/auth';
-import { auth, googleProvider } from '../services/firebaseConfig';
+import { auth, googleProvider, db } from '../services/firebaseConfig';
 import { persistState, clearState, getInitialState } from '../utils/persist-state';
 import { useOrgNewsAPI } from './useOrgNewsAPI';
 import { useNYTimesAPI } from './useNYTimesAPI';
 import { useGuardianAPI } from './useGuardianAPI';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 interface UserType {
   uid: string;
   displayName: string;
@@ -30,7 +31,7 @@ export const useFetchArticles = () => {
   const [personalizedCategories, setPersonalizedCategories] = useState<string[]>([]);
   const [personalizedSources, setPersonalizedSources] = useState<string[]>([]);
   const [date, setDate] = useState<{ from: Date; to: Date }>({ from: thirtyDaysAgo, to: new Date() });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -77,7 +78,6 @@ export const useFetchArticles = () => {
       };
       setUser(userInfo);
       persistState('user', userInfo);
-      console.log('User Info:', userInfo);
     } catch (error) {
       console.error('Google Sign-In Error:', error);
     }
@@ -87,6 +87,8 @@ export const useFetchArticles = () => {
     try {
       await signOut(auth);
       clearState('user');
+      setPersonalizedCategories([]);
+      setPersonalizedSources([]);
       console.log('User signed out successfully.');
     } catch (error) {
       console.error('Google Sign-Out Error:', error);
@@ -106,20 +108,74 @@ export const useFetchArticles = () => {
       prevSelected.includes(source) ? prevSelected.filter((item) => item !== source) : [...prevSelected, source],
     );
   };
-  useEffect(() => {
+
+  const fetchPersonalizedData = async () => {
     if (user?.uid) {
-      const persistCategories: string[] | undefined = getInitialState(`category-${user?.uid}`);
-      const persistSources: string[] | undefined = getInitialState(`sources-${user?.uid}`);
-      if (persistCategories) setPersonalizedCategories(persistCategories);
-      if (persistSources) setPersonalizedSources(persistSources);
+      try {
+        const categoriesDocRef = doc(db, 'personalizedCategories', user.uid);
+        const sourcesDocRef = doc(db, 'personalizedSources', user.uid);
+
+        const categoriesDoc = await getDoc(categoriesDocRef);
+        const sourcesDoc = await getDoc(sourcesDocRef);
+
+        if (categoriesDoc.data()?.categories.length) {
+          const categoriesData = categoriesDoc.data();
+          setPersonalizedCategories(categoriesData?.categories || []);
+        } else {
+          setPersonalizedCategories([]);
+        }
+
+        if (sourcesDoc.data()?.sources?.length) {
+          const sourcesData = sourcesDoc.data();
+          setPersonalizedSources(sourcesData?.sources || []);
+        } else {
+          setPersonalizedSources([]);
+        }
+      } catch (error) {
+        console.error('Error fetching personalized data:', error);
+      }
     }
-  }, [user?.uid]);
+  };
+
   useEffect(() => {
-    if (user?.uid) {
-      if (personalizedCategories) persistState(`category-${user?.uid}`, personalizedCategories);
-      if (personalizedSources) persistState(`sources-${user?.uid}`, personalizedSources);
-    }
-  }, [personalizedSources, personalizedCategories, user?.uid]);
+    const updatePersonalizedData = async () => {
+      if (user?.uid) {
+        const categoriesDocRef = doc(db, 'personalizedCategories', user.uid);
+        const sourcesDocRef = doc(db, 'personalizedSources', user.uid);
+
+        try {
+          const categoriesDoc = await getDoc(categoriesDocRef);
+          const sourcesDoc = await getDoc(sourcesDocRef);
+
+          const categoriesData = { categories: personalizedCategories, userId: user?.uid };
+          const sourcesData = { sources: personalizedSources, userId: user?.uid };
+
+          if (personalizedCategories.length) {
+            if (categoriesDoc.data()?.categories.length && categoriesDoc.data()?.userId == user?.uid) {
+              await setDoc(categoriesDocRef, categoriesData, { merge: true });
+            } else {
+              await setDoc(categoriesDocRef, categoriesData);
+            }
+          }
+
+          if (personalizedSources.length) {
+            if (sourcesDoc.data()?.sources?.length && sourcesDoc.data()?.userId == user?.uid) {
+              await setDoc(sourcesDocRef, sourcesData, { merge: true });
+            } else {
+              await setDoc(sourcesDocRef, sourcesData);
+            }
+          }
+
+          console.log('Personalized data successfully updated in Firestore');
+        } catch (error) {
+          console.error('Error updating Firestore:', error);
+        }
+      }
+    };
+
+    updatePersonalizedData();
+  }, [personalizedSources, personalizedCategories, user?.uid]); // Dependency array to refetch when `personalizedSources`, `personalizedCategories`, or `user?.uid` changes
+
   const resetFields = () => {
     setSourceOptions([]);
     setSelectedOptions([]);
@@ -145,6 +201,7 @@ export const useFetchArticles = () => {
     toggleModal,
     toggleCategory,
     toggleSource,
+    fetchPersonalizedData,
     onSearchKeyword,
     thirtyDaysAgo,
     setSearchInput,
@@ -158,6 +215,8 @@ export const useFetchArticles = () => {
     setSelectedOptions,
     personalizedCategories,
     handleSearchInputChange,
+    orgNewsArticles,
+    nyTimesArticles,
     articles: [...orgNewsArticles, ...nyTimesArticles, ...guardianArticles],
   };
 };

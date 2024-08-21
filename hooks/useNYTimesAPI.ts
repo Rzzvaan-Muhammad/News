@@ -24,7 +24,9 @@ export const useNYTimesAPI = (
     end_date: to.toISOString().split('T')[0],
     sortBy: 'publishedAt',
     //page: 1,
-    sources: `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`,
+    sources: personalizedSources.length
+      ? `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`
+      : getSelectedSourcesQuery(sourceOptions),
   };
 
   const { data, error, isLoading } = useQuery({

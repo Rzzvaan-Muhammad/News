@@ -25,16 +25,16 @@ export const PersonalizedFeedModal: React.FC<ModalProps> = ({
         <div>
           <h3 className="text-lg mb-1 font-medium">Categories</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {categoryOptions.map((category) => (
+            {categoryOptions?.map((category) => (
               <button
                 key={category.value}
                 onClick={() => toggleCategory(category.value)}
                 className={`px-4 py-2 rounded-lg text-white ${
-                  personalizedCategories.includes(category.value) ? 'bg-green-500' : 'bg-gray-500'
-                } ${!personalizedCategories.includes(category.value) ? 'opacity-50' : ''} flex items-center justify-between`}
+                  personalizedCategories?.includes(category.value) ? 'bg-green-500' : 'bg-gray-500'
+                } ${!personalizedCategories?.includes(category.value) ? 'opacity-50' : ''} flex items-center justify-between`}
               >
                 {category.label}
-                {personalizedCategories.includes(category.value) && (
+                {personalizedCategories?.includes(category.value) && (
                   <svg
                     className="w-5 h-5 ml-2"
                     fill="none"
@@ -58,11 +58,11 @@ export const PersonalizedFeedModal: React.FC<ModalProps> = ({
                 key={source.value}
                 onClick={() => toggleSource(source.value)}
                 className={`px-4 py-2 rounded-lg text-white ${
-                  personalizedSources.includes(source.value) ? 'bg-green-500' : 'bg-gray-500'
-                } ${!personalizedSources.includes(source.value) ? 'opacity-50' : ''} flex items-center justify-between`}
+                  personalizedSources?.includes(source.value) ? 'bg-green-500' : 'bg-gray-500'
+                } ${!personalizedSources?.includes(source.value) ? 'opacity-50' : ''} flex items-center justify-between`}
               >
                 {source.label}
-                {personalizedSources.includes(source.value) && (
+                {personalizedSources?.includes(source.value) && (
                   <svg
                     className="w-5 h-5 ml-2"
                     fill="none"

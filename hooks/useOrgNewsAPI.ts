@@ -8,6 +8,7 @@ import { Option } from '../components/MultiSelectDropdown';
 type Params = APIParams & {
   from: string;
   to: string;
+  domains: string;
 };
 
 export const useOrgNewsAPI = (
@@ -19,12 +20,15 @@ export const useOrgNewsAPI = (
   personalizedSources: string[],
 ) => {
   const params: Params = {
-    q: `${getSelectedCategoriesQuery(selectedOptions)}, ${personalizedCategories?.toString()}`,
+    q: getSelectedCategoriesQuery(selectedOptions),
     from: from.toISOString().split('T')[0],
     to: to.toISOString().split('T')[0],
     sortBy: 'publishedAt',
-    pageSize: 3,
-    sources: `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`,
+    domains: personalizedCategories.length ? personalizedCategories?.toString() : '',
+    //pageSize: 3,
+    sources: personalizedSources.length
+      ? `${getSelectedSourcesQuery(sourceOptions)}, ${personalizedSources?.toString()}`
+      : getSelectedSourcesQuery(sourceOptions),
   };
 
   const { data, error, isLoading } = useQuery({
